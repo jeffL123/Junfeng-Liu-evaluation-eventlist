@@ -1,0 +1,65 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  h1 {
+    text-align: center;
+  }
+
+  button {
+    padding: 10px 20px;
+    background-color: #008cba;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .delete-event-btn{
+    background-color: red;
+  }
+  table {
+    width: 90%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    border: 5px solid;
+    border-spacing: 2px;
+    border-color: antiquewhite;
+    background-color: white;
+  }
+
+  th, td {
+    padding: 10px;
+    text-align: middle;
+    border-bottom: 1px solid white;
+    white-space: nowrap;
+  }
+  tbody{
+    background-color: antiquewhite;
+    margin-top: 10px;
+  }
+  
+  button svg {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+    margin: auto;
+
+  }
+
+  .add-event-btn {
+    margin-bottom: 10px;
+  }
+
+  
+  
