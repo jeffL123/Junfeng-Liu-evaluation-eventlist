@@ -55,7 +55,7 @@ const API = (function() {
     }
   
     async addEvent(newEvent) {
-      const event = await API.addEvent(newEvent);
+      const  event = await API.addEvent(newEvent);
       this.#events.push(event);
       return event;
     }
@@ -87,7 +87,7 @@ const API = (function() {
       this.addEventCallback = null;
       this.deleteEventCallback = null;
       this.updateEventCallback = null;
-      
+      this.cancelEventCallback = null;
       this.bindEvents();
     }
   
@@ -95,7 +95,7 @@ const API = (function() {
       this.eventList.innerHTML = "";
       events.forEach((event) => {
         const eventElem = this.createEventElem(event);
-        this.eventList.appendChild(eventElem);
+        this.eventList.append(eventElem);
       });
     }
   
@@ -103,19 +103,31 @@ const API = (function() {
       const eventElem = document.createElement("tr");
       eventElem.setAttribute("data-id", event.id);
       eventElem.innerHTML = `
-        <td contenteditable>${event.name}</td>
-        <td contenteditable>${event.startDate}</td>
-        <td contenteditable>${event.endDate}</td>
         <td>
-          <button class="edit-event-btn" data-id="${event.id}">
+          <input type="text" value="${event.name}" readonly>
+        </td>
+        <td>
+          <input type="date" value="${event.startDate}" readonly>
+        </td>
+        <td>
+          <input type="date" value="${event.endDate}" readonly>
+        </td>
+        <td>
+          <button class="save-event-btn" data-id="${event.id}" style = "display: none;">
             <svg focusable="false" aria-hidden="true" viewBox="0 0 24 24" data-testid="EditIcon" aria-label="fontSize small">
               <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path>
             </svg>
+          </button>
+          <button class="edit-event-btn" data-id="${event.id}">
+          Edit
           </button>
           <button class="delete-event-btn" data-id="${event.id}" >
             <svg focusable="false" aria-hidden="true" viewBox="0 0 24 24" data-testid="DeleteIcon" aria-label="fontSize small">
               <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"></path>
             </svg>
+          </button>
+          <button class="cancel-event-btn" data-id="${event.id}">
+            Cancel
           </button>
         </td>
       `;
@@ -129,12 +141,33 @@ const API = (function() {
   
       this.eventList.addEventListener("click", (e) => {
         const target = e.target;
-        if (target.classList.contains("edit-event-btn")) {
+        if (target.classList.contains("save-event-btn")) {
           const eventId = target.getAttribute("data-id");
+          const eventRow = document.querySelector(`tr[data-id="${eventId}"]`);
+          const editBtn = eventRow.querySelector(".edit-event-btn");
+          const saveBtn = eventRow.querySelector(".save-event-btn");
+          editBtn.style.display = "inline-block";
+          saveBtn.style.display = "none";
           this.updateEventCallback(eventId);
         } else if (target.classList.contains("delete-event-btn")) {
           const eventId = target.getAttribute("data-id");
           this.deleteEventCallback(eventId);
+        } else if(target.classList.contains("cancel-event-btn")){
+          const eventId = target.getAttribute("data-id");
+          this.cancelEventCallback(eventId);
+        } else if(target.classList.contains("edit-event-btn")){
+          const eventId = target.getAttribute("data-id");
+          const eventRow = document.querySelector(`tr[data-id="${eventId}"]`);
+          const nameCell = eventRow.cells[0];
+          const startDateCell = eventRow.cells[1];
+          const endDateCell = eventRow.cells[2];
+          const editBtn = eventRow.querySelector(".edit-event-btn");
+          const saveBtn = eventRow.querySelector(".save-event-btn");
+          nameCell.querySelector('input').readOnly = false;
+          startDateCell.querySelector('input').readOnly = false;
+          endDateCell.querySelector('input').readOnly = false;
+          editBtn.style.display = "none";
+          saveBtn.style.display = "inline-block";
         }
       });
     }
@@ -154,7 +187,7 @@ const API = (function() {
       this.view.addEventCallback = this.handleAddEvent.bind(this);
       this.view.deleteEventCallback = this.handleDeleteEvent.bind(this);
       this.view.updateEventCallback = this.handleUpdateEvent.bind(this);
-  
+      this.view.cancelEventCallback = this.handleCancelEvent.bind(this);
       this.init();
     }
   
@@ -179,26 +212,23 @@ const API = (function() {
       const nameCell = eventRow.cells[0];
       const startDateCell = eventRow.cells[1];
       const endDateCell = eventRow.cells[2];
-      if (nameCell.isContentEditable) {
-        nameCell.contentEditable = false;
-        startDateCell.contentEditable = false;
-        endDateCell.contentEditable = false;
-        nameCell.classList.remove("editable");
-        startDateCell.classList.remove("editable");
-        endDateCell.classList.remove("editable");
-        this.model.updateEvent(eventId, {
-          name: nameCell.textContent,
-          startDate: startDateCell.textContent,
-          endDate: endDateCell.textContent
-        });
-      } else {
-        nameCell.contentEditable = true;
-        startDateCell.contentEditable = true;
-        endDateCell.contentEditable = true;
-        nameCell.classList.add("editable");
-        startDateCell.classList.add("editable");
-        endDateCell.classList.add("editable");
+      if(nameCell.querySelector('input').value.trim() === ""){
+        alert("Please enter vaild name");
+        return;
       }
+        this.model.updateEvent(eventId, {
+          name: nameCell.querySelector('input').value,
+          startDate: startDateCell.querySelector('input').value,
+          endDate: endDateCell.querySelector('input').value
+        }); 
+    }
+
+    async handleCancelEvent(eventId){
+        this.model.updateEvent(eventId, {
+          name: '',
+          startDate: null,
+          endDate: null
+        });
     }
   }
   
